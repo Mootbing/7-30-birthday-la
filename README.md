@@ -6,20 +6,23 @@ Interactive OpenStreetMap itinerary for **Thursday, July 30, 2026**:
 
 [Open the GitHub Pages site](https://mootbing.github.io/7-30-birthday-la/)
 
-![Trip planner preview](assets/preview.webp)
+## Features
 
-## What is included
-
-- OpenStreetMap tiles rendered with Leaflet
+- Interactive OpenStreetMap map rendered with Leaflet
 - OSM/OSRM driving and walking routes calculated in the browser
-- Planned time versus routing baseline, distance, traffic scenarios, and schedule slack
-- Exact calendar sequence with Uber, walking, reservation, and gap blocks
+- Scheduled time versus routing baseline, estimated traffic padding, gaps, and arrival slack
+- Exact itinerary for Oceana, Greystone, Beverly Hills, Avra, Rodeo Drive, Hollywood, Griffith, and Uchi
 - Confirmed Avra and Uchi reservations
-- Downloadable `.ics` itinerary
+- Downloadable calendar itinerary embedded directly in the site
+- Responsive desktop and mobile layout
+
+## How it is packaged
+
+The full static planner is gzip-compressed and divided into `p0.txt` through `p7.txt`. `index.html` assembles and decompresses those chunks in the browser. This keeps every repository file small while preserving the complete interactive site.
 
 ## Run locally
 
-No build step is required. Serve the repository root with any static HTTP server:
+No build step is required:
 
 ```bash
 python3 -m http.server 8000
@@ -27,24 +30,10 @@ python3 -m http.server 8000
 
 Then open `http://localhost:8000`.
 
-## Publish the prepared repository
-
-After authenticating GitHub CLI as `Mootbing`, run one of these from the repository folder:
-
-```bash
-./scripts/publish.sh
-```
-
-```powershell
-.\scripts\publish.ps1
-```
-
-The helper creates the public `Mootbing/7-30-birthday-la` repository, pushes `main`, enables GitHub Actions as the Pages source, and dispatches the deployment workflow.
-
 ## GitHub Pages
 
-The workflow in `.github/workflows/pages.yml` builds a minimal `_site` directory and deploys it through the official GitHub Pages actions.
+`.github/workflows/pages.yml` publishes the static files with GitHub's official Pages actions whenever `main` changes.
 
 ## Routing note
 
-Driving durations are OSM routing baselines plus selectable planning multipliers. They are not live Uber or live-traffic ETAs.
+Driving durations are OSM routing baselines plus planning buffers. They are not live Uber or live-traffic ETAs.
