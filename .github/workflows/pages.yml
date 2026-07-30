@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -30,13 +30,65 @@ jobs:
           cp index.html p0.txt p1.txt p2.txt p3.txt p4.txt p5.txt p6.txt p7.txt .nojekyll _site/
 
       - name: Configure Pages
+        id: configure
+        continue-on-error: true
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
+        id: upload
+        if: steps.configure.outcome == 'success'
+        continue-on-error: true
         uses: actions/upload-pages-artifact@v4
         with:
           path: ./_site
 
       - name: Deploy to GitHub Pages
         id: deployment
+        if: steps.upload.outcome == 'success'
+        continue-on-error: true
         uses: actions/deploy-pages@v4
+
+      - name: Verify live Pages response
+        id: verify
+        if: steps.deployment.outcome == 'success'
+        continue-on-error: true
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set +e
+          code="000"
+          content_check="false"
+          for attempt in 1 2 3 4 5 6; do
+            code="$(curl -L -sS -o page-response.html -w '%{http_code}' "$PAGE_URL")"
+            if [ "$code" = "200" ]; then
+              if grep -q 'Opening the OSM trip planner' page-response.html; then
+                content_check="true"
+              fi
+              break
+            fi
+            sleep 10
+          done
+          echo "http_code=$code" >> "$GITHUB_OUTPUT"
+          echo "content_check=$content_check" >> "$GITHUB_OUTPUT"
+
+      - name: Record deployment receipt
+        if: always()
+        run: |
+          cat > pages-status.json <<EOF
+          {
+            "configure_outcome": "${{ steps.configure.outcome }}",
+            "upload_outcome": "${{ steps.upload.outcome }}",
+            "deploy_outcome": "${{ steps.deployment.outcome }}",
+            "verify_outcome": "${{ steps.verify.outcome }}",
+            "page_url": "${{ steps.deployment.outputs.page_url }}",
+            "page_http_code": "${{ steps.verify.outputs.http_code }}",
+            "content_check": "${{ steps.verify.outputs.content_check }}",
+            "source_commit": "${GITHUB_SHA}",
+            "workflow_run": "https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          }
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pages-status.json
+          git commit -m 'Record Pages deployment receipt [skip ci]' || true
+          git push || true
