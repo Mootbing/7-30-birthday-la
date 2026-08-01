@@ -8,6 +8,7 @@ Interactive OpenStreetMap itinerary for **Thursday, July 30, 2026**:
 
 ## Features
 
+- Layered Chinese ink-wash hero with scroll- and cursor-driven parallax depth
 - Interactive OpenStreetMap map rendered with Leaflet
 - OSM/OSRM driving and walking routes calculated in the browser
 - Scheduled time versus routing baseline, estimated traffic padding, gaps, and arrival slack

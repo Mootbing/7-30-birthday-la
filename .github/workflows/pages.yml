@@ -27,7 +27,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p _site
-          cp index.html ink-wash-la.png p0.txt p1.txt p2.txt p3.txt p4.txt p5.txt p6.txt p7.txt .nojekyll _site/
+          cp index.html ink-wash-la.png ink-wash-parallax-bg.png ink-wash-parallax-mid.png ink-wash-parallax-front.png p0.txt p1.txt p2.txt p3.txt p4.txt p5.txt p6.txt p7.txt .nojekyll _site/
 
       - name: Configure Pages
         id: configure
@@ -53,21 +53,25 @@ jobs:
         run: |
           set +e
           code="000"
-          asset_code="000"
+          bg_asset_code="000"
+          mid_asset_code="000"
+          front_asset_code="000"
           content_check="false"
           for attempt in 1 2 3 4 5 6; do
             code="$(curl -L -sS -o page-response.html -w '%{http_code}' "$PAGE_URL")"
-            asset_code="$(curl -L -sS -o /dev/null -w '%{http_code}' "${PAGE_URL%/}/ink-wash-la.png")"
-            if [ "$code" = "200" ] && [ "$asset_code" = "200" ] && grep -q 'LA Birthday Journey' page-response.html; then
+            bg_asset_code="$(curl -L -sS -o /dev/null -w '%{http_code}' "${PAGE_URL%/}/ink-wash-parallax-bg.png")"
+            mid_asset_code="$(curl -L -sS -o /dev/null -w '%{http_code}' "${PAGE_URL%/}/ink-wash-parallax-mid.png")"
+            front_asset_code="$(curl -L -sS -o /dev/null -w '%{http_code}' "${PAGE_URL%/}/ink-wash-parallax-front.png")"
+            if [ "$code" = "200" ] && [ "$bg_asset_code" = "200" ] && [ "$mid_asset_code" = "200" ] && [ "$front_asset_code" = "200" ] && grep -q 'LA Birthday Journey' page-response.html; then
               content_check="true"
               break
             fi
             sleep 10
           done
           echo "http_code=$code" >> "$GITHUB_OUTPUT"
-          echo "asset_http_code=$asset_code" >> "$GITHUB_OUTPUT"
+          echo "asset_http_code=$bg_asset_code/$mid_asset_code/$front_asset_code" >> "$GITHUB_OUTPUT"
           echo "content_check=$content_check" >> "$GITHUB_OUTPUT"
-          if [ "$code" != "200" ] || [ "$asset_code" != "200" ] || [ "$content_check" != "true" ]; then
+          if [ "$code" != "200" ] || [ "$bg_asset_code" != "200" ] || [ "$mid_asset_code" != "200" ] || [ "$front_asset_code" != "200" ] || [ "$content_check" != "true" ]; then
             exit 1
           fi
 

@@ -35,6 +35,7 @@
         <meta name="twitter:title" content="LA Birthday Journey — July 30, 2026">
         <meta name="twitter:description" content="One long day, drawn in ink.">
         <meta name="twitter:image" content="https://mootbing.github.io/7-30-birthday-la/ink-wash-la.png">
+        <link rel="preload" as="image" href="ink-wash-parallax-bg.png" fetchpriority="high">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=DM+Sans:wght@400;500;600;700&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
@@ -136,18 +137,45 @@
 
           .shell { width: min(calc(100% - 64px), var(--shell)); }
           .hero {
+            --parallax-bg-x: 0px;
+            --parallax-bg-y: 0px;
+            --parallax-mid-x: 0px;
+            --parallax-mid-y: 0px;
+            --parallax-front-x: 0px;
+            --parallax-front-y: 0px;
+            isolation: isolate;
             min-height: min(900px, 94svh);
             color: var(--ink);
-            background:
-              linear-gradient(90deg, rgba(251,250,246,.98) 0%, rgba(251,250,246,.9) 29%, rgba(251,250,246,.38) 52%, rgba(251,250,246,.03) 78%),
-              linear-gradient(0deg, var(--paper) 0%, transparent 18%),
-              url("ink-wash-la.png") center bottom / cover no-repeat,
-              var(--paper);
+            background: var(--paper);
             border-radius: 0;
           }
-          .hero::after { content: ""; position: absolute; right: 4%; bottom: 7%; width: 7rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(31,40,34,.3)); }
-          .hero__inner { display: flex; flex-direction: column; justify-content: center; min-height: min(900px, 94svh); padding: 130px 0 100px; }
-          .hero__glow { opacity: .2; filter: blur(24px); }
+          .hero__parallax { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+          .hero__parallax::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+              linear-gradient(90deg, rgba(251,250,246,.99) 0%, rgba(251,250,246,.91) 29%, rgba(251,250,246,.43) 52%, rgba(251,250,246,.04) 78%),
+              linear-gradient(0deg, var(--paper) 0%, transparent 19%);
+          }
+          .hero__layer {
+            position: absolute;
+            inset: -7% -5% -24%;
+            width: 110%;
+            height: 131%;
+            max-width: none;
+            object-fit: cover;
+            object-position: center bottom;
+            transform-origin: center bottom;
+            will-change: transform;
+            user-select: none;
+          }
+          .hero__layer--bg { transform: translate3d(var(--parallax-bg-x), var(--parallax-bg-y), 0); }
+          .hero__layer--mid { transform: translate3d(var(--parallax-mid-x), var(--parallax-mid-y), 0); }
+          .hero__layer--front { transform: translate3d(var(--parallax-front-x), var(--parallax-front-y), 0); }
+          .hero::after { content: ""; position: absolute; z-index: 4; right: 4%; bottom: 7%; width: 7rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(31,40,34,.3)); }
+          .hero__inner { z-index: 3; display: flex; flex-direction: column; justify-content: center; min-height: min(900px, 94svh); padding: 130px 0 100px; }
+          .hero__glow { z-index: 2; opacity: .2; filter: blur(24px); }
           .hero__glow--one { right: 14%; top: 4%; background: rgba(159,61,50,.16); }
           .hero__glow--two { left: 43%; bottom: -15%; background: rgba(82,119,108,.18); }
           .eyebrow, .panel__kicker { color: var(--rose); font-size: .65rem; font-weight: 700; letter-spacing: .22em; }
@@ -425,7 +453,8 @@
             .ink-brand__seal { width: 38px; height: 38px; }
             .ink-nav__links { gap: 16px; }
             .ink-nav__links a:first-child { display: none; }
-            .hero { min-height: 810px; background-position: 64% bottom; }
+            .hero { min-height: 810px; }
+            .hero__layer { object-position: 64% bottom; }
             .hero::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(251,250,246,.28), transparent 38%, rgba(251,250,246,.56) 76%, var(--paper)); pointer-events: none; }
             .hero__inner { justify-content: flex-start; min-height: 810px; padding: 160px 0 100px; }
             h1 { max-width: 470px; font-size: clamp(3.75rem, 17vw, 5.6rem); }
@@ -455,10 +484,12 @@
           @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+            .hero__layer { transform: none !important; will-change: auto; }
           }
           @media print {
             .ink-nav, .scroll-progress { display: none !important; }
             .hero { min-height: auto; background: white; }
+            .hero__parallax { display: none; }
             .hero__inner { min-height: auto; padding: 25px 0; }
           }
         </style>`;
@@ -469,6 +500,7 @@
         .replace('<title>LA Day Plan — Beverly Hills, Hollywood & Griffith</title>', '<title>LA Birthday Journey — July 30, 2026</title>')
         .replace('</head>', redesign + '</head>')
         .replace('<body>', `<body><div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div><nav class="ink-nav shell" aria-label="Journey navigation"><a class="ink-brand" href="#"><span class="ink-brand__seal" aria-hidden="true">洛</span><span><b>LA Birthday Journey</b><small>Los Angeles · July 30, 2026</small></span></a><div class="ink-nav__links"><a href="#map-panel">Route map</a><a href="#itinerary">Itinerary</a></div></nav>`)
+        .replace('<header class="hero">', '<header class="hero"><div class="hero__parallax" aria-hidden="true"><img class="hero__layer hero__layer--bg" src="ink-wash-parallax-bg.png" alt="" fetchpriority="high" decoding="async"><img class="hero__layer hero__layer--mid" src="ink-wash-parallax-mid.png" alt="" decoding="async"><img class="hero__layer hero__layer--front" src="ink-wash-parallax-front.png" alt="" decoding="async"></div>')
         .replace('<div class="eyebrow">LOS ANGELES · THURSDAY, JULY 30, 2026</div>', '<div class="eyebrow">洛杉矶 · THURSDAY, JULY 30, 2026</div>')
         .replace('<h1>Beverly Hills → Hollywood → Griffith</h1>', '<h1><em>一日</em> One long day,<br>drawn in ink.</h1>')
         .replace('A route-first day plan with OpenStreetMap directions, travel buffers, hard reservations, and every gap made visible.', 'Santa Monica → Beverly Hills → Hollywood → Griffith Observatory → West Hollywood. A birthday journey from the Pacific to the city lights.')
@@ -477,7 +509,7 @@
         .replace('        mapButtons.push(`<a class="small-button" href="${osmPlaceUrl(location)}" target="_blank" rel="noreferrer">Open in OSM</a>`);', '        mapButtons.push(`<a class="small-button" href="${osmPlaceUrl(location)}" target="_blank" rel="noopener noreferrer">Open in OSM</a>`);\n        mapButtons.push(`<a class="small-button small-button--apple" href="${applePlaceUrl(location)}" target="_blank" rel="noopener noreferrer">Apple Maps</a>`);\n        mapButtons.push(`<a class="small-button small-button--google" href="${googlePlaceUrl(location)}" target="_blank" rel="noopener noreferrer">Google Maps</a>`);')
         .replace('map = L.map("map", { zoomControl: true, scrollWheelZoom: true }).setView([34.073, -118.402], 11);', 'map = L.map("map", { zoomControl: true, scrollWheelZoom: true }).setView([34.073, -118.402], 11); map.attributionControl.setPrefix(false);')
         .replace('color: leg.mode === "uber" ? "#253657" : "#18776d"', 'color: leg.mode === "uber" ? "#007AFF" : "#34A853"')
-        .replace('</body>', `<script>(function(){var bar=document.getElementById('scrollProgress');function paint(){var height=document.documentElement.scrollHeight-innerHeight;bar.style.width=(height>0?scrollY/height*100:0)+'%'}addEventListener('scroll',paint,{passive:true});addEventListener('resize',paint);paint();var timeline=document.getElementById('timeline');if(!timeline)return;timeline.querySelectorAll('[data-done-item].is-done').forEach(function(button){var item=button.closest('.timeline-item');if(item)item.classList.add('is-complete')});timeline.addEventListener('click',function(event){var button=event.target.closest('[data-done-item]');if(!button||button.classList.contains('is-done'))return;var item=button.closest('.timeline-item');if(!item)return;requestAnimationFrame(function(){if(!button.classList.contains('is-done'))return;item.style.setProperty('--done-height',item.offsetHeight+'px');item.classList.add('is-completing');var finished=false;function finish(animationEvent){if(animationEvent&&animationEvent.target!==item)return;if(finished)return;finished=true;item.removeEventListener('animationend',finish);item.classList.remove('is-completing');item.classList.add('is-complete')}item.addEventListener('animationend',finish);setTimeout(function(){finish()},800)})},true)})();<\/script></body>`);
+        .replace('</body>', `<script>(function(){var bar=document.getElementById('scrollProgress');var hero=document.querySelector('.hero');var reduced=matchMedia('(prefers-reduced-motion: reduce)');var finePointer=matchMedia('(hover: hover) and (pointer: fine)');var frame=0;var pointerX=0;var pointerY=0;var targetX=0;var targetY=0;function setLayer(name,x,y){hero.style.setProperty('--parallax-'+name+'-x',x.toFixed(2)+'px');hero.style.setProperty('--parallax-'+name+'-y',y.toFixed(2)+'px')}function paint(){frame=0;var height=document.documentElement.scrollHeight-innerHeight;bar.style.width=(height>0?scrollY/height*100:0)+'%';if(hero&&!reduced.matches){pointerX+=(targetX-pointerX)*.14;pointerY+=(targetY-pointerY)*.14;if(Math.abs(targetX-pointerX)<.01)pointerX=targetX;if(Math.abs(targetY-pointerY)<.01)pointerY=targetY;var y=Math.max(0,Math.min(scrollY,hero.offsetHeight));setLayer('bg',pointerX*5,-y*.018+pointerY*3);setLayer('mid',pointerX*-12,-y*.11-pointerY*8);setLayer('front',pointerX*-30,-y*.24-pointerY*18);if(pointerX!==targetX||pointerY!==targetY)schedule()}}function schedule(){if(!frame)frame=requestAnimationFrame(paint)}function point(event){if(!finePointer.matches||reduced.matches||event.pointerType==='touch')return;var box=hero.getBoundingClientRect();targetX=Math.max(-1,Math.min(1,(event.clientX-box.left)/box.width*2-1));targetY=Math.max(-1,Math.min(1,(event.clientY-box.top)/box.height*2-1));schedule()}function resetPointer(){targetX=0;targetY=0;schedule()}addEventListener('scroll',schedule,{passive:true});addEventListener('resize',schedule);if(hero){hero.addEventListener('pointermove',point,{passive:true});hero.addEventListener('pointerleave',resetPointer)}if(reduced.addEventListener)reduced.addEventListener('change',resetPointer);schedule();var timeline=document.getElementById('timeline');if(!timeline)return;timeline.querySelectorAll('[data-done-item].is-done').forEach(function(button){var item=button.closest('.timeline-item');if(item)item.classList.add('is-complete')});timeline.addEventListener('click',function(event){var button=event.target.closest('[data-done-item]');if(!button||button.classList.contains('is-done'))return;var item=button.closest('.timeline-item');if(!item)return;requestAnimationFrame(function(){if(!button.classList.contains('is-done'))return;item.style.setProperty('--done-height',item.offsetHeight+'px');item.classList.add('is-completing');var finished=false;function finish(animationEvent){if(animationEvent&&animationEvent.target!==item)return;if(finished)return;finished=true;item.removeEventListener('animationend',finish);item.classList.remove('is-completing');item.classList.add('is-complete')}item.addEventListener('animationend',finish);setTimeout(function(){finish()},800)})},true)})();<\/script></body>`);
 
       document.open();
       document.write(html);
