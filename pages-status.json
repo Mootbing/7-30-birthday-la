@@ -3,9 +3,9 @@
   "upload_outcome": "success",
   "deploy_outcome": "success",
   "verify_outcome": "success",
-  "page_url": "https://mootbing.github.io/7-30-birthday-la/",
+  "page_url": "https://mootbing.github.io/milkdog-birthday-la/",
   "page_http_code": "200",
   "content_check": "true",
-  "source_commit": "69fbfc51c88765591ad0b62113116a4ce426a848",
-  "workflow_run": "https://github.com/Mootbing/7-30-birthday-la/actions/runs/30653783916"
+  "source_commit": "cc611e9d29afa9d677eea0b346b4b77c03d8cbb6",
+  "workflow_run": "https://github.com/Mootbing/milkdog-birthday-la/actions/runs/30680515246"
 }
